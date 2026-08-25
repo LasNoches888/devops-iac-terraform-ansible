@@ -1,0 +1,5 @@
+---
+- name: Ensure index.html is deployed
+  copy:
+    content: "<h1>Deployed by Ansible</h1>"
+    dest: /tmp/iac-lab-index.html
