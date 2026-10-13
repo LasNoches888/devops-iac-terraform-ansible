@@ -1,0 +1,28 @@
+---
+# Проверка результата: Terraform поднял контейнер, Ansible развернул файл.
+# Запуск (из каталога ansible/):  ansible-playbook playbooks/verify.yml
+- name: Verify lab deployment
+  hosts: web
+  gather_facts: false
+  tasks:
+    - name: Stat the file deployed by the webserver role
+      ansible.builtin.stat:
+        path: /tmp/iac-lab-index.html
+      register: index_file
+
+    - name: Assert that the file exists
+      ansible.builtin.assert:
+        that:
+          - index_file.stat.exists
+        fail_msg: "/tmp/iac-lab-index.html не найден — запустите playbook.yml"
+        success_msg: "Файл развёрнут Ansible"
+
+    - name: Check that the nginx container answers on port 8081
+      ansible.builtin.uri:
+        url: http://localhost:8081
+        status_code: 200
+      register: nginx_response
+
+    - name: Show result
+      ansible.builtin.debug:
+        msg: "nginx отвечает: HTTP {{ nginx_response.status }}"
